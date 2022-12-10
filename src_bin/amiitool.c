@@ -7,15 +7,31 @@
 
 #include <nfc3d/amiibo.h>
 #include <nfc3d/version.h>
-#include "util.h"
+#include "../util.h"
 #include <stdio.h>
 #include <string.h>
+#ifdef _MSC_VER
+#include "../getopt.h"
+#else
 #include <getopt.h>
+#endif
 #include <errno.h>
 
 #define NTAG215_SIZE 540
 
 static char * self;
+
+#define STDIN  0
+#define STDOUT 1
+#define STDERR 2
+#ifdef _WIN32
+# include <io.h>
+# include <fcntl.h>
+# define SET_BINARY_MODE(handle) _setmode(handle, O_BINARY)
+#else
+# define SET_BINARY_MODE(handle) ((void)0)
+#endif
+
 
 void usage() {
 	fprintf(stderr,
@@ -46,6 +62,10 @@ int main(int argc, char ** argv) {
 	bool lenient = false;
 
 	char c;
+
+  SET_BINARY_MODE(STDIN);
+  SET_BINARY_MODE(STDOUT);
+
 	while ((c = getopt(argc, argv, "edci:s:o:k:l")) != -1) {
 		switch (c) {
 			case 'e':
@@ -96,9 +116,10 @@ int main(int argc, char ** argv) {
 			return 3;
 		}
 	}
+
 	size_t readPages = fread(original, 4, NTAG215_SIZE / 4, f);
 	if (readPages < NFC3D_AMIIBO_SIZE / 4) {
-		fprintf(stderr, "Could not read from input: %s (%d)\n", strerror(errno), errno);
+		fprintf(stderr, "Could not read from input: %s (%d) - Read: %zu\n", strerror(errno), errno, readPages);
 		return 3;
 	}
 	fclose(f);

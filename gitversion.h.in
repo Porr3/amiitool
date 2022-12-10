@@ -1,0 +1,2 @@
+#define GIT_COMMIT_ID ${COMMIT_ID}
+#define GIT_COMMIT_COUNT ${COMMIT_CNT}

@@ -13,3 +13,5 @@
 
 # Ignore version files
 /gitversion.h
+
+build
