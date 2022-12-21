@@ -11,8 +11,14 @@ message(STATUS "Build Mode: ${CMAKE_BUILD_TYPE}")
 ###########################
 ### Create gitversion.h ###
 
-execute_process(COMMAND cmd /C "git rev-parse HEAD" OUTPUT_VARIABLE COMMIT_ID)
-execute_process(COMMAND cmd /C "git rev-list --count --all" OUTPUT_VARIABLE COMMIT_CNT)
+if(WIN32)
+    execute_process(COMMAND cmd /C "git rev-parse HEAD" OUTPUT_VARIABLE COMMIT_ID)
+    execute_process(COMMAND cmd /C "git rev-list --count --all" OUTPUT_VARIABLE COMMIT_CNT)
+else()
+    execute_process(COMMAND bash -c "git rev-parse HEAD" OUTPUT_VARIABLE COMMIT_ID)
+    execute_process(COMMAND bash -c "git rev-list --count --all" OUTPUT_VARIABLE COMMIT_CNT)
+endif()
+
 string(REGEX REPLACE "\n$" "" COMMIT_ID "${COMMIT_ID}")
 string(REGEX REPLACE "\n$" "" COMMIT_CNT "${COMMIT_CNT}")
 string(SUBSTRING "${COMMIT_ID}" 0 8 COMMIT_ID)
@@ -38,6 +44,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_gen/version_features.c ${CMAK
 ####################################
 
 option(ENABLE_PROGRAMS "" OFF)
+option(GEN_FILES "" OFF)
+option(ENABLE_TESTING "" OFF)
 add_subdirectory(mbedtls)
 
 include_directories(include)
